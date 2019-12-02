@@ -1,0 +1,10 @@
+Assignment #01
+
+a. You are inside the P01_fdisk. Use dd to create a 128MiB file named disk.
+b. Use fdisk to set the heads to 4, sectors to 32, and cylinders to the appropriate number, for disk.
+c. Use fdisk to create more than 4 primary partitions, or more than 2 extended partitions.
+d. Use fdisk to create the following partitions using the complete disk without gaps:
+    + 1 P (FAT32 (LBA)), 1 E, 1 P (Linux)
+    + 2 L (Linux swap, Linux)
+e. Display the disk partitions using "sudo fdisk -l disk".
+f. Take a snapshot and send it to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
