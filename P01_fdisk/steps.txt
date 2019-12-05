@@ -1,6 +1,7 @@
 Assignment #01
 
 a. You are inside the P01_fdisk. Use dd to create a 128MiB file named disk.
+	(Hint: You may use /dev/zero or /dev/urandom)
 b. Use fdisk to set the heads to 4, sectors to 32, and cylinders to the appropriate number, for disk.
 c. Use fdisk to create more than 4 primary partitions, or more than 2 extended partitions.
 d. Use fdisk to create the following partitions using the complete disk without gaps:
