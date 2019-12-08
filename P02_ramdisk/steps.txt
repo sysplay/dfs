@@ -13,7 +13,7 @@ a. Change code to achieve the following:
 	+ Disk to have the same geometry as in Assignment #01
 b. Re-compile the dor.ko driver by typing "make".
 c. Re-load the driver dor.ko using "sudo insmod dor.ko", after unloading the previous one using "sudo rmmod dor"
-d. Display the ramdisk partitions using "sudo fdisk -l /dev/rb".
+d. Display the ramdisk partitions using "sudo fdisk -l -u=cylinders /dev/rb".
 e. Take a snapshot and send it to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
 
 Part #3 (optional - advanced)

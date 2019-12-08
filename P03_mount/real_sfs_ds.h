@@ -33,11 +33,11 @@ typedef struct sfs_super_block
 typedef struct sfs_file_entry
 {
 	/* TODO: Fill in the fields for the file entry for it to be of size SIMULA_FS_ENTRY_SIZE */
-	; /* File name */
-	; /* File size in bytes */
-	; /* File timestamp in seconds since Epoch */
-	; /* File permissions perms only for user; Replicated for group & others */
-	; /* File data block's index arrat */
+	; /* File name of size SIMULA_FS_FILENAME_LEN + 1 */
+	; /* 4-byte file size in bytes */
+	; /* 4-byte file modify timestamp in seconds since Epoch */
+	; /* 4-byte file permissions perms only for user; Replicated for group & others */
+	; /* Array of 4-byte indices of file's data blocks */
 } sfs_file_entry_t;
 
 #ifdef __KERNEL__
