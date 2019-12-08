@@ -1,11 +1,11 @@
 Assignment #02
 
 Part #1
-a. You are inside the P02_ramdisk. Complete the TODOs in the file ram_block.c in here.
+a. Complete the TODOs in the file ram_block.c in here.
 b. Compile the dor.ko driver by typing "make".
 c. Load the driver dor.ko using "sudo insmod dor.ko".
 d. Display the ramdisk partitions using "sudo fdisk -l /dev/rb".
-e. Take a snapshot and send it to SysPlay's WhatsApp number, <b>NOT</b> the WhatsApp group, for gradation.
+e. Take a snapshot and send it to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
 
 Part #2
 a. Change code to achieve the following:
@@ -14,7 +14,7 @@ a. Change code to achieve the following:
 b. Re-compile the dor.ko driver by typing "make".
 c. Re-load the driver dor.ko using "sudo insmod dor.ko", after unloading the previous one using "sudo rmmod dor"
 d. Display the ramdisk partitions using "sudo fdisk -l /dev/rb".
-e. Take a snapshot and send it to SysPlay's WhatsApp number, <b>NOT</b> the WhatsApp group, for gradation.
+e. Take a snapshot and send it to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
 
 Part #3 (optional - advanced)
 a. Change code to achieve the following:
@@ -22,6 +22,6 @@ a. Change code to achieve the following:
 b. Re-compile the dor.ko driver by typing "make".
 c. Re-load the driver dor.ko using "sudo insmod dor.ko", after unloading the previous one using "sudo rmmod dor"
 d. Display the ramdisk partitions using "sudo fdisk -l /dev/rb".
-e. Take a snapshot and send it to SysPlay's WhatsApp number, <b>NOT</b> the WhatsApp group, for gradation.
+e. Take a snapshot and send it to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
 
 Note down your observations, if any, to discuss in the next class.
