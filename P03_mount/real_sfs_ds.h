@@ -27,8 +27,8 @@ typedef struct sfs_super_block
 	byte4_t entry_table_block_start; /* in blocks */
 	byte4_t entry_count; /* Total entries in the file system */
 	byte4_t data_block_start; /* in blocks */
-	byte4_t reserved[SIMULA_FS_BLOCK_SIZE / 4 - 8];
-} sfs_super_block_t; /* Making it of SIMULA_FS_BLOCK_SIZE */
+	byte4_t reserved[SIMULA_FS_BLOCK_SIZE / 4 - 8]; /* Making it of SIMULA_FS_BLOCK_SIZE */
+} sfs_super_block_t;
 
 typedef struct sfs_file_entry
 {
