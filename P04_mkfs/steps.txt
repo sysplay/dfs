@@ -16,3 +16,4 @@ e. Post the snapshots of the following:
 	> sudo dd if=/dev/rb1 skip=1 count=1 | xxd | head
 	> sudo dd if=/dev/rb1 skip=32 count=1 | xxd | head
 	to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
+f. Find out the bug in sfs_create in browse_real_sfs.c & Share it on whatsapp.
