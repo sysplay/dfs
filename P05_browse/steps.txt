@@ -1,0 +1,17 @@
+Assignment #05
+
+a. Apply the patch, provided in the WhatsApp group, by typing "patch --follow-symlinks -p1 < p05.patch", in here.
+b. Complete the TODOs in the file browse_real_sfs.c in here.
+c. Compile the browse_real_sfs.c application by typing "make".
+d. Browse /dev/rb1 using ./browse_real_sfs and do the following:
+	> Add your name & hobby as contents in files x & y, respectively and list.
+	> Read the files x & y, one by one.
+	> Change permissions of x & y to rw- and r-x, respectively and list.
+	> Delete x and list.
+	Post the transaction log to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
+e. Post the snapshots of the following:
+	> sudo dd if=/dev/rb1 skip=1 count=1 | xxd | head
+	> sudo dd if=/dev/rb1 skip=32 count=1 | xxd | head
+	> sudo dd if=/dev/rb1 skip=33 count=1 | xxd | head
+	to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
+f. Fix the bug noted in Assignment #04 in sfs_create (optional).

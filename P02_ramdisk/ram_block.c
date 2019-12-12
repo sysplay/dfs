@@ -17,7 +17,7 @@
 
 static u_int rb_major = 0;
 
-/* 
+/*
  * The internal structure representation of our Device
  */
 static struct rb_device
@@ -66,7 +66,7 @@ static int rb_getgeo(struct block_device *bdev, struct hd_geometry *geo)
 	return 0;
 }
 
-/* 
+/*
  * Actual Data transfer
  */
 static int rb_transfer(struct request *req)
@@ -163,7 +163,7 @@ static void rb_request(struct request_queue *q)
 	}
 }
 
-/* 
+/*
  * These are the file operations that performed on the ram block device
  */
 static struct block_device_operations rb_fops =
@@ -174,7 +174,7 @@ static struct block_device_operations rb_fops =
 	.getgeo = rb_getgeo,
 };
 	
-/* 
+/*
  * This is the registration and initialization section of the ram block device
  * driver
  */
@@ -212,9 +212,9 @@ static int __init rb_init(void)
 	
 	/*
 	 * Add the gendisk structure
-	 * By using this memory allocation is involved, 
-	 * the minor number we need to pass bcz the device 
-	 * will support this much partitions 
+	 * By using this memory allocation is involved,
+	 * the minor number we need to pass bcz the device
+	 * will support this much partitions
 	 */
 	rb_dev.rb_disk = alloc_disk(RB_MINOR_CNT);
 	if (!rb_dev.rb_disk)
@@ -237,7 +237,7 @@ static int __init rb_init(void)
 	/* TODO 3: Setting up the request queue */
 	rb_dev.rb_disk->queue = NULL;
 	/*
-	 * You do not want partition information to show up in 
+	 * You do not want partition information to show up in
 	 * cat /proc/partitions set this flags
 	 */
 	//rb_dev.rb_disk->flags = GENHD_FL_SUPPRESS_PARTITION_INFO;
