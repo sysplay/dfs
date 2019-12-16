@@ -1,7 +1,7 @@
 Assignment #06
 
 a. Complete the TODOs in the file real_sfs_bb.c in here.
-b. Compile the real_sfs_bb.c application by typing "make".
+b. Compile the real_sfs_bb.c driver by typing "make".
 c. Load the driver sfs_bb.ko using "sudo insmod sfs_bb.ko".
 d. Post the snapshots of the following:
 	> grep sfs /proc/filesystems
@@ -9,6 +9,7 @@ d. Post the snapshots of the following:
 	> sudo mount -t sfs /dev/rb3 /mnt # No error even if no SFS file system on /dev/rb3. Why?
 	> mount | grep sfs
 	> df
+	> stat /mnt
 	> cd /mnt # Observe the error. Why?
 	> ls /mnt # Observe the error. Why?
 	to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
