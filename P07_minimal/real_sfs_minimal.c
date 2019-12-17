@@ -47,8 +47,8 @@ static int sfs_fill_super(struct super_block *sb, void *data, int silent)
 		return -EIO;
 	}
 	/* Updating the VFS super_block */
-	sb->s_magic = 0 /* TODO 1: File System Type extracted from our superblock */;
-	sb->s_blocksize = 0 /* TODO 2A: File System Block Size extracted from our superblock */;
+	sb->s_magic = 0; /* TODO 1: File System Type extracted from our superblock */
+	sb->s_blocksize = 0; /* TODO 2A: File System Block Size extracted from our superblock */
 	sb->s_blocksize_bits = get_bit_pos(0 /* TODO 2B: File System Block Size */);
 	sb->s_type = &sfs; // file_system_type
 	sb->s_op = &sfs_sops; // super block operations

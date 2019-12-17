@@ -12,7 +12,7 @@
 static int read_sb_from_real_sfs(sfs_info_t *info, sfs_super_block_t *sb)
 {
 	struct buffer_head *bh;
-	int sb_block_start /* TODO 4: Initialize to super block's block number */;
+	int sb_block_start; /* TODO 4: Initialize to super block's block number */
 
 	if (!(bh = sb_bread(info->vfs_sb, sb_block_start)))
 	{
@@ -30,7 +30,7 @@ static int read_from_real_sfs(sfs_info_t *info, byte4_t block, byte4_t offset, v
 	struct buffer_head *bh;
 
 	// Translating the real SFS block numbering to underlying block device block numbering, for sb_bread()
-	abs = 0/* 6A: Compute the absolute total byte offset */;
+	abs = 0; /* 6A: Compute the absolute total byte offset */
 	block = abs / bd_block_size;
 	offset = abs % bd_block_size;
 	if (offset + len > bd_block_size) // Should never happen
@@ -53,7 +53,7 @@ static int write_to_real_sfs(sfs_info_t *info, byte4_t block, byte4_t offset, vo
 	struct buffer_head *bh;
 
 	// Translating the real SFS block numbering to underlying block device block numbering, for sb_bread()
-	abs = 0/* 6B: Compute the absolute total byte offset */;
+	abs = 0; /* 6B: Compute the absolute total byte offset */
 	block = abs / bd_block_size;
 	offset = abs % bd_block_size;
 	if (offset + len > bd_block_size) // Should never happen
