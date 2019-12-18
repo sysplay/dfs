@@ -1,8 +1,8 @@
 Assignment #07
 
-a. Complete the TODOs in the files real_sfs_minimal.c & real_sfs_ops.c in here.
+a. Complete the TODOs (only upto 8) in the files real_sfs_minimal.c & real_sfs_ops.c in here.
 b. Compile the driver sfs_first.ko by typing "make".
-c. Load the driver sfs_bb.ko using "sudo insmod sfs_bb.ko". You may have to do the following, if previous assignment's driver still running:
+c. Load the driver sfs_first.ko using "sudo insmod sfs_first.ko". You may have to do the following, if previous assignment's driver still running:
 	> sudo umount /mnt
 	> sudo rmmod sfs_bb
 d. Post the snapshots of the following:

@@ -18,6 +18,9 @@
 #define INV_INODE (-1)
 #define INV_BLOCK (-1)
 
+int sfs_get_file_entry(sfs_info_t *info, int vfs_ino, sfs_file_entry_t *fe);
+int sfs_update_file_entry(sfs_info_t *info, int vfs_ino, sfs_file_entry_t *fe);
+
 int init_browsing(sfs_info_t *info);
 void shut_browsing(sfs_info_t *info);
 
@@ -35,8 +38,6 @@ int sfs_create(sfs_info_t *info, char *fn, int perms, sfs_file_entry_t *fe);
 int sfs_lookup(sfs_info_t *info, char *fn, sfs_file_entry_t *fe);
 int sfs_remove(sfs_info_t *info, char *fn);
 
-int sfs_get_file_entry(sfs_info_t *info, int vfs_ino, sfs_file_entry_t *fe);
 int sfs_update(sfs_info_t *info, int vfs_ino, int *size, int *timestamp, int *perms);
-int sfs_update_file_entry(sfs_info_t *info, int vfs_ino, sfs_file_entry_t *fe);
 
 #endif
