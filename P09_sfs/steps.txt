@@ -1,0 +1,68 @@
+Assignment #09
+
+a. Complete the TODOs in the file real_sfs.c in here.
+b. Compile the driver sfs_final.ko by typing "make".
+c. Load the driver sfs_final.ko using "sudo insmod sfs_final.ko". You may have to do the following, if previous assignment's driver still running:
+	> sudo umount /mnt (Outside /mnt folder)
+	> sudo rmmod sfs_first
+d. Run "dmesg -w" on a separate terminal. Obeserve the logs in it with various commands you type: mount, cd, ls, ...
+e. Test your driver using the following (keep observing dmesg -w):
+	> grep real_sfs /proc/filesystems
+	> sudo mount -t real_sfs /dev/rb1 /mnt
+	> mount | grep real_sfs
+	> df # Observe the error
+	> cd /mnt # Observe the error
+	> ls # Observe the error
+f. Now, uncomment the functions in sfs_iops, especially the sfs_lookup, and "make" again. Then, try the following:
+	> sudo umount /mnt && sudo rmmod sfs_final && sudo insmod sfs_final.ko && sudo mount -t real_sfs /dev/rb1 /mnt # Observe the output on "dmesg -w" terminal and press some Enter's on it.
+	> cd /mnt # Should work. Observe the extra output on "dmesg -w" terminal, if any. Which function is called?
+	> cd -
+	> cd - # Observe NO extra output on "dmesg -w" terminal. Why?
+	> ls # Observe the error
+	> cd -
+g. Now, uncomment the functions in sfs_dops, and "make" again. Then, try the following:
+	> sudo umount /mnt && sudo rmmod sfs_final && sudo insmod sfs_final.ko && sudo mount -t real_sfs /dev/rb1 /mnt # Observe the output on "dmesg -w" terminal and press some Enter's on it
+	> cd /mnt
+	> ls -la # Should work. Observe the extra output on "dmesg -w" terminal. Think through the flow
+	How many times is sfs_iterate / sfs_readdir called & why? Do you have some existing files? If yes, where did they come from? And relate the number of files with the count in sfs_iterate / sfs_readdir.
+h. Continue, with the following command:
+	> touch <your_name> # (Replace <your_name> by your first name. Should work, if sfs_create is already available - otherwise enable & retry.) Observe the extra output on "dmesg -w" terminal. Think through the flow. Why is sfs_lookup called? Observe the inode number in sfs_create
+	> ls -l <your_name> # Observe NO extra output on "dmesg -w" terminal. Why?
+	> ls -la # Observe the extra output on "dmesg -w" terminal. Notice the change in the count in sfs_iterate / sfs_readdir
+	> echo "Content" > <your_name> # Observe the error
+i. Continue, with the following command:
+	> rm <your_name> # Observe the extra output on "dmesg -w" terminal. Which function is called?
+	> ls -la # Observe the extra output on "dmesg -w" terminal. Notice the change in the count in sfs_iterate / sfs_readdir
+	> cd -
+j. Now, uncomment the functions in both sfs_fops & sfs_aops, and "make" again. Then, try the following:
+	> sudo umount /mnt && sudo rmmod sfs_final && sudo insmod sfs_final.ko && sudo mount -t real_sfs /dev/rb1 /mnt # Observe the output on "dmesg -w" terminal and press some Enter's on it
+	> cd /mnt
+	> ls -la
+	> echo "Content" > <your_name> # Should work. Observe the extra output on "dmesg -w" terminal, if any. Observe the calls to sfs_write_begin, sfs_get_block, sfs_file_release. Think through the flow
+	> ls -la # Observe the file size change. Observe the extra output on "dmesg -w" terminal. Notice the change in the count in sfs_iterate / sfs_readdir. Also, observe the delayed call to sfs_writepage. Why is it delayed? Also, observe the sector accesses from the dor.ko driver
+k. Continue, with the following command:
+	> cat <your_name> # Observe the content, and call to sfs_readpage and sfs_file_release in the extra output on "dmesg -w". Think through the flow
+	> sudo chmod 421 <your_name>
+	> ls -la # Observe the permission change
+	> cd -
+	> sudo umount /mnt && sudo mount -t real_sfs /dev/rb1 /mnt
+	> cd /mnt
+	> ls -la # What's weird? What happened to the permissions, file size, ...? Why?
+	> cat <your_name> # Observe no output
+l. Now, uncomment the function in sfs_sops, and "make" again. Then, try the following:
+	> sudo umount /mnt && sudo ../P04_mkfs/mkfs.sfs /dev/rb1
+	> sudo rmmod sfs_final && sudo insmod sfs_final.ko && sudo mount -t real_sfs /dev/rb1 /mnt # Observe the output on "dmesg -w" terminal and press some Enter's on it
+	> cd /mnt
+	> ls -la
+	> echo "Content" > <your_name>
+	> ls -la
+	> cat <your_name>
+	> chmod 421 <your_name> # Observe the delayed call to sfs_write_inode in the extra output on "dmesg -w". Why?
+	> ls -la # Observe the permission change
+	> cd -
+	> sudo umount /mnt && sudo mount -t real_sfs /dev/rb1 /mnt
+	> cd /mnt
+	> cat <your_name> # Observe the written contents
+	> ls -la # What's different? What happened to the permissions? Why?
+m. Once everything is working as above, post the patch p09.patch of your changes generated using "git diff . > p09.patch", to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
+n. Wow! Did you try using the file browser? Now play around.
