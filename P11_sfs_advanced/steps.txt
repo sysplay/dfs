@@ -1,0 +1,41 @@
+Assignment #11
+
+a. Add the logic in real_sfs_ops.[hc], real_sfs.c to achieve "ln -s" in here.
+	Implement sfs_symlink and attach to .symlink (in struct inode_operations).
+	Prototypes in <kernel_headers>/include/linux/fs.h
+	Reference Code: <kernel_source>/fs/minix/namei.c - search for .symlink
+b. Compile the driver sfs_final.ko by typing "make".
+c. Load the driver sfs_final.ko using "sudo insmod sfs_final.ko". You may have to do the following, if previous assignment's driver still running:
+	> sudo rmmod sfs_final
+d. Post the snapshot of the following:
+	> sudo mount -t real_sfs /dev/rb1 /mnt
+	> cd /mnt
+	> echo "Test Content" > xyz
+	> ls -la
+	> ln -s xyz lmn
+	> ls -la
+	> dd if=/dev/zero of=max bs=512 count=10 # Observe the error. Why?
+	> ls -la
+	> cd -
+	to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
+e. Add the logic in real_sfs_ds.h, real_sfs_ops.[hc], real_sfs.c to support files bigger than 4.5 KiB.
+	Increase the block size to 1KiB
+f. Compile the driver sfs_final.ko by typing "make".
+g. Post the snapshot of the following:
+	> sudo umount /mnt && sudo rmmod sfs_final && sudo insmod sfs_final.ko && sudo mount -t real_sfs /dev/rb1 /mnt
+	> cd /mnt
+	> dd if=/dev/zero of=max bs=1024 count=10 # Observe the error. Why?
+	> ls -la
+	> cd -
+	to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
+h. Add the logic in real_sfs_ds.h, real_sfs_ops.[hc], real_sfs.c to support even bigger files.
+	Using the ext2 / 3 types data block organization with only one block for one level of referencing.
+i. Compile the driver sfs_final.ko by typing "make".
+j. Post the snapshot of the following:
+	> sudo umount /mnt && sudo rmmod sfs_final && sudo insmod sfs_final.ko && sudo mount -t real_sfs /dev/rb1 /mnt
+	> cd /mnt
+	> dd if=/dev/zero of=max bs=1024 count=XXX # Replace XXX with number to create the maximum file size
+	> ls -la
+	> cd -
+	> sudo umount /mnt
+	to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.

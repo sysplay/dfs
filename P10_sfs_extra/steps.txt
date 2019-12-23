@@ -1,0 +1,49 @@
+Assignment #10
+
+a. Compile the driver sfs_final.ko by typing "make" in here.
+b. Load the driver sfs_final.ko using "sudo insmod sfs_final.ko". You may have to do the following, if previous assignment's driver still running:
+	> sudo rmmod sfs_final
+c. Share your observation about creating, listing, accessing files with file name length greater than 15:
+	> sudo mount -t real_sfs /dev/rb1 /mnt
+	> mount | grep real_sfs
+	> cd /mnt
+	> df # Observe the error
+	> touch abcdefghijklmnop
+	> touch ...abcdefxfedcba...
+	> ls -l
+	> ls -la
+	> ls -l abcdefghijklmno # No error
+	> ls -l abcdefghijklmnop # No error
+	> ls -l abcdefghijklmnopq # Observe the error
+	> ls -l ...abcdefxfedcba... # No error
+	> cat ...abcdefxfedcb # No error
+	> cd -
+	> sudo umount /mnt && sudo mount -t real_sfs /dev/rb1 /mnt
+	> cd /mnt
+	> ls -l abcdefghijklmno
+	> ls -l abcdefghijklmnop # Why is the behaviour different now?
+	> cd -
+d. Add the logic in real_sfs_ops.[hc], real_sfs.c to achieve "df".
+	Implement sfs_statfs and attach to .statfs (in struct super_operations).
+	Prototypes in <kernel_headers>/include/linux/fs.h
+	Reference Code: <kernel_source>/fs/fat/inode.c - search for .statfs
+e. Compile the driver sfs_final.ko by typing "make".
+f. Post the snapshot of the following:
+	> sudo umount /mnt && sudo rmmod sfs_final && sudo insmod sfs_final.ko && sudo mount -t real_sfs /dev/rb1 /mnt
+	> df # No error & Proper details
+	to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
+g. Add the logic in real_sfs_ops.[hc], real_sfs.c to achieve "mv".
+	Implement sfs_rename and attach to .rename (in struct inode_operations).
+	Prototypes in <kernel_headers>/include/linux/fs.h
+	Reference Code: <kernel_source>/fs/fat/namei_msdos.c - search for .rename
+h. Compile the driver sfs_final.ko by typing "make".
+i. Post the snapshot of the following:
+	> sudo umount /mnt && sudo rmmod sfs_final && sudo insmod sfs_final.ko && sudo mount -t real_sfs /dev/rb1 /mnt
+	> cd /mnt
+	> echo "Test Content" > xyz
+	> ls -la
+	> mv xyz abc
+	> ls -la
+	> cd -
+	> sudo umount /mnt
+	to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
