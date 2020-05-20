@@ -2,14 +2,14 @@ Assignment #03
 
 Part #1
 a. Have the /dev/rb* from the Assignment #02.
-b. Try "sudo mount /dev/rb1 /mnt".  Observe the error & Send reason on whatsapp.
-c. Do "sudo mkfs.vfat /dev/rb1" and then, "sudo mount /dev/rb1 /mnt". Now, all okay. Why? Send reason to whatsapp.
+b. Try "sudo mount /dev/rb1 /mnt".  Observe the error & Send reason to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
+c. Do "sudo mkfs.vfat /dev/rb1" and then, "sudo mount /dev/rb1 /mnt". Now, all okay. Why? Send reason to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
 d. Create a xyz file under /mnt & Check out its permissions.
-e. Try changing the file's permissions to 700 & Re-check its permissions. Post reason for your observation to whatsapp.
+e. Try changing the file's permissions to 700 & Re-check its permissions. Post reason for your observation to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
 f. Unmount /mnt
 
 Part #2
-a. Try "sudo mount -t ext2 /dev/rb1 /mnt". Observe the error & Send reason on whatsapp.
+a. Try "sudo mount -t ext2 /dev/rb1 /mnt". Observe the error & Send reason to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
 b. Try the same as in Part 1, for an ext2 file system on /dev/rb3.
 
 Part #3

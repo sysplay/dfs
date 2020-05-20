@@ -7,7 +7,7 @@ c. Use fdisk to create more than 4 primary partitions, or more than 2 extended p
 d. Use fdisk to create the following partitions using the complete disk without gaps:
     + 1 P (FAT32 (LBA)), 1 E, 1 P (Linux)
     + 2 L (Linux swap, Linux)
-e. Display the disk partitions using p in normal mode of "fdisk disk".
+e. Display the disk partitions using p of "fdisk disk" in both sectors & cylinders (unit) display mode (use u).
 f. Take a snapshot and send it to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
 
 Note down your observations, if any, to discuss in the next class.

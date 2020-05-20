@@ -12,8 +12,8 @@ a. Complete the TODOs in the file browse_real_sfs.c in here.
 b. Compile the browse_real_sfs.c application by typing "make".
 c. Try browsing /dev/rb3 using ./browse_real_sfs. Observe and decode the output.
 d. Browse /dev/rb1 using ./browse_real_sfs and create two files x & y and list. Try creating x again. Post the transaction log to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
-e. Post the snapshots of the following:
+e. Post the snapshot of the following:
 	> sudo dd if=/dev/rb1 skip=1 count=1 | xxd | head
 	> sudo dd if=/dev/rb1 skip=32 count=1 | xxd | head
 	to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
-f. Find out the bug in sfs_create in browse_real_sfs.c & Share it on whatsapp.
+f. Find out the bug in sfs_create in browse_real_sfs.c & Share it on SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.

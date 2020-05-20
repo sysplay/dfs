@@ -39,6 +39,7 @@ void sfs_list(int sfs_handle)
 {
 	int i;
 	sfs_file_entry_t fe;
+	time_t ts;
 
 	/* TODO 2A: Seek to the start of file entries table, to check for its existence */
 	lseek(sfs_handle, 0, SEEK_SET);
@@ -46,12 +47,13 @@ void sfs_list(int sfs_handle)
 	{
 		read(sfs_handle, &fe, sizeof(sfs_file_entry_t));
 		if (!fe.name[0]) continue;
+		ts = (time_t)(fe.timestamp);
 		printf("%-15s  %10d bytes  %c%c%c  %s",
 			fe.name, fe.size,
 			fe.perms & 04 ? 'r' : '-',
 			fe.perms & 02 ? 'w' : '-',
 			fe.perms & 01 ? 'x' : '-',
-			ctime((time_t *)&fe.timestamp)
+			ctime(&ts)
 			);
 	}
 }

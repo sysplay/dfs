@@ -197,7 +197,7 @@ static int sfs_inode_create(struct inode *parent_inode, struct dentry *dentry, u
 static int sfs_inode_create(struct inode *parent_inode, struct dentry *dentry, umode_t mode, bool excl)
 #endif
 {
-	char fn[dentry->d_name.len + 1];
+	char fn[SIMULA_FS_FILENAME_LEN + 1];
 	int perms = 0;
 	sfs_info_t *info = (sfs_info_t *)(parent_inode->i_sb->s_fs_info);
 	int ino;
@@ -206,8 +206,8 @@ static int sfs_inode_create(struct inode *parent_inode, struct dentry *dentry, u
 
 	printk(KERN_INFO "sfs: sfs_inode_create\n");
 
-	strncpy(fn, dentry->d_name.name, dentry->d_name.len);
-	fn[dentry->d_name.len] = 0;
+	strncpy(fn, dentry->d_name.name, SIMULA_FS_FILENAME_LEN);
+	fn[SIMULA_FS_FILENAME_LEN] = 0;
 	if (mode & (S_IRUSR | S_IRGRP | S_IROTH))
 		mode |= (S_IRUSR | S_IRGRP | S_IROTH);
 	if (mode & (S_IWUSR | S_IWGRP | S_IWOTH))
@@ -248,15 +248,15 @@ static int sfs_inode_create(struct inode *parent_inode, struct dentry *dentry, u
 }
 static int sfs_inode_unlink(struct inode *parent_inode, struct dentry *dentry)
 {
-	char fn[dentry->d_name.len + 1];
+	char fn[SIMULA_FS_FILENAME_LEN + 1];
 	sfs_info_t *info = (sfs_info_t *)(parent_inode->i_sb->s_fs_info);
 	int ino;
 	struct inode *file_inode = dentry->d_inode;
 
 	printk(KERN_INFO "sfs: sfs_inode_unlink\n");
 
-	strncpy(fn, dentry->d_name.name, dentry->d_name.len);
-	fn[dentry->d_name.len] = 0;
+	strncpy(fn, dentry->d_name.name, SIMULA_FS_FILENAME_LEN);
+	fn[SIMULA_FS_FILENAME_LEN] = 0;
 	if ((ino = sfs_remove(NULL, "")) == INV_INODE) /* TODO 7: Fill in all the parameters */
 		return -EINVAL;
 
@@ -270,7 +270,7 @@ static struct dentry *sfs_inode_lookup(struct inode *parent_inode, struct dentry
 #endif
 {
 	sfs_info_t *info = (sfs_info_t *)(parent_inode->i_sb->s_fs_info);
-	char fn[dentry->d_name.len + 1];
+	char fn[SIMULA_FS_FILENAME_LEN + 1];
 	int ino;
 	sfs_file_entry_t fe;
 	struct inode *file_inode = NULL;
@@ -279,8 +279,8 @@ static struct dentry *sfs_inode_lookup(struct inode *parent_inode, struct dentry
 
 	if (parent_inode->i_ino != sfs_root_inode->i_ino)
 		return ERR_PTR(-ENOENT);
-	strncpy(fn, dentry->d_name.name, dentry->d_name.len);
-	fn[dentry->d_name.len] = 0;
+	strncpy(fn, dentry->d_name.name, SIMULA_FS_FILENAME_LEN);
+	fn[SIMULA_FS_FILENAME_LEN] = 0;
 	if ((ino = sfs_lookup(NULL, "", NULL)) == INV_INODE) /* TODO 8: Fill in all the parameters */
 	  return d_splice_alias(file_inode, dentry); // Possibly create a new one
 
@@ -316,7 +316,7 @@ static struct inode_operations sfs_iops =
 	create: sfs_inode_create,
 	unlink: sfs_inode_unlink,
 	lookup: sfs_inode_lookup
-	 */
+	*/
 };
 
 /*

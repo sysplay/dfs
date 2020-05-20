@@ -2,17 +2,17 @@ Assignment #08
 
 a. Complete the TODOs in the file real_sfs_ops.c in here.
 b. Compile the driver sfs_first.ko by typing "make".
-c. Load the driver sfs_first.ko using "sudo insmod sfs_first.ko". You may have to do the following, if previous assignment's driver still running:
-	> sudo umount /mnt
-	> sudo rmmod sfs_first
+c. Load the driver sfs_first.ko using "sudo insmod sfs_first.ko".
 d. Test your driver using the following:
 	> grep sfs /proc/filesystems
 	> sudo mount -t sfs /dev/rb3 /mnt # Observe the error
 	> sudo mount -t sfs /dev/rb1 /mnt # No error (assuming mkfs.sfs has already been done)
 	> mount | grep sfs
-	> df
+	> df /mnt # Observe the error
 	> stat /mnt
 	> cd /mnt # Observe the error
 	> ls /mnt # Observe the error
-e. Post the patch p08.patch of your changes generated using "git diff ../P07_minimal > p08.patch",
+	> sudo umount /mnt
+e. Unload the driver sfs_first.ko using "sudo rmmod sfs_first".
+f. Post the patch p08.patch of your changes generated using "git diff ../P07_minimal > p08.patch",
 	to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.

@@ -8,6 +8,9 @@
 #include <linux/genhd.h> // For basic block driver framework
 #include <linux/blkdev.h> // For at least, struct block_device_operations
 #include <linux/hdreg.h> // For struct hd_geometry
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,0,0))
+#include <linux/blk-mq.h>
+#endif
 #include <linux/errno.h>
 
 #include "ram_device.h"
@@ -23,13 +26,18 @@ static u_int rb_major = 0;
 static struct rb_device
 {
 	/* Size is the size of the device (in sectors) */
-	unsigned int size;
+	sector_t size;
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5,0,0))
 	/* For exclusive access to our request queue */
 	spinlock_t lock;
+#else
+	/* Utility structure to store various parameters like queue depth, cmd size, ... */
+	struct blk_mq_tag_set tag_set;
+#endif
 	/* Our request queue */
-	struct request_queue *rb_queue;
+	struct request_queue *queue;
 	/* This is kernel's representation of an individual disk device */
-	struct gendisk *rb_disk;
+	struct gendisk *disk;
 } rb_dev;
 
 static int rb_open(struct block_device *bdev, fmode_t mode)
@@ -96,7 +104,7 @@ static int rb_transfer(struct request *req)
 
 	int ret = 0;
 
-	//printk(KERN_DEBUG "rb: Dir:%d; Sec:%lld; Cnt:%d\n", dir, start_sector, sector_cnt);
+	//printk(KERN_DEBUG "rb: Dir:%d; Sec:%lld; Cnt:%d\n", dir, (unsigned long long)(start_sector), sector_cnt);
 
 	sector_offset = 0;
 	rq_for_each_segment(bv, req, iter)
@@ -131,10 +139,11 @@ static int rb_transfer(struct request *req)
 
 	return ret;
 }
-	
+
 /*
  * Represents a block I/O request for us to execute
  */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5,0,0))
 static void rb_request(struct request_queue *q)
 {
 	struct request *req;
@@ -143,25 +152,35 @@ static void rb_request(struct request_queue *q)
 	/* Gets the current request from the dispatch queue */
 	while ((req = blk_fetch_request(q)) != NULL)
 	{
-#if 0
-		/*
-		 * This function tells us whether we are looking at a filesystem request
-		 * - one that moves block of data
-		 */
-		if (!blk_fs_request(req))
-		{
-			printk(KERN_NOTICE "rb: Skip non-fs request\n");
-			/* We pass 0 to indicate that we successfully completed the request */
-			__blk_end_request_all(req, 0);
-			//__blk_end_request(req, 0, blk_rq_bytes(req));
-			continue;
-		}
-#endif
 		ret = rb_transfer(req);
-		__blk_end_request_all(req, ret);
+		/* End the request */
+		__blk_end_request_all(req, ret); // Equivalent to the following:
 		//__blk_end_request(req, ret, blk_rq_bytes(req));
 	}
 }
+#else
+static blk_status_t rb_request(struct blk_mq_hw_ctx *hctx, const struct blk_mq_queue_data *bd)
+{
+	struct request *req;
+	int status;
+
+	/* Gets the current request */
+	req = bd->rq;
+
+	/* Start new request procedure w/ a timer to time the processing */
+	blk_mq_start_request(req);
+
+	status = ((rb_transfer(req) == 0) ? BLK_STS_OK : BLK_STS_IOERR);
+
+	/* End request procedure */
+	blk_mq_end_request(req, status); // Equivalent to the following:
+	//if (blk_update_request(req, status, blk_rq_bytes(req))) // GPL-only symbol
+	//	BUG();
+	//__blk_mq_end_request(req, status);
+
+	return BLK_STS_OK;
+}
+#endif
 
 /*
  * These are the file operations that performed on the ram block device
@@ -173,19 +192,29 @@ static struct block_device_operations rb_fops =
 	.release = rb_close,
 	.getgeo = rb_getgeo,
 };
-	
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,0,0))
+/*
+ * This is the call back (request function) setup for the upper layers to process the requests in request queue(s)
+ */
+static struct blk_mq_ops rb_mq_ops =
+{
+	.queue_rq = rb_request
+};
+#endif
+
 /*
  * This is the registration and initialization section of the ram block device
  * driver
  */
 static int __init rb_init(void)
 {
-	int ret;
+	sector_t size;
 
 	/* Set up our Disk On RAM (DOR) */
-	if ((ret = ramdevice_init()) < 0)
+	if ((size = ramdevice_init()) < 0)
 	{
-		return ret;
+		return (int)(size);
 	}
 	/* TODO 1: Initialize with DOR memory size */
 	rb_dev.size = 0;
@@ -200,56 +229,63 @@ static int __init rb_init(void)
 	}
 
 	/* Get a request queue (here queue is created) */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5,0,0))
 	spin_lock_init(&rb_dev.lock);
-	rb_dev.rb_queue = blk_init_queue(rb_request, &rb_dev.lock);
-	if (rb_dev.rb_queue == NULL)
+	rb_dev.queue = blk_init_queue(rb_request, &rb_dev.lock);
+#else
+	rb_dev.queue = blk_mq_init_sq_queue(&rb_dev.tag_set, &rb_mq_ops, 128, BLK_MQ_F_SHOULD_MERGE);
+#endif
+	if (IS_ERR(rb_dev.queue))
 	{
-		printk(KERN_ERR "rb: blk_init_queue failure\n");
+		printk(KERN_ERR "rb: request queue allocation & initialization failure\n");
 		unregister_blkdev(rb_major, "rb");
 		ramdevice_cleanup();
-		return -ENOMEM;
+		return PTR_ERR(rb_dev.queue);
 	}
-	
+
 	/*
 	 * Add the gendisk structure
 	 * By using this memory allocation is involved,
 	 * the minor number we need to pass bcz the device
 	 * will support this much partitions
 	 */
-	rb_dev.rb_disk = alloc_disk(RB_MINOR_CNT);
-	if (!rb_dev.rb_disk)
+	rb_dev.disk = alloc_disk(RB_MINOR_CNT);
+	if (!rb_dev.disk)
 	{
 		printk(KERN_ERR "rb: alloc_disk failure\n");
-		blk_cleanup_queue(rb_dev.rb_queue);
+		blk_cleanup_queue(rb_dev.queue);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,0,0))
+		blk_mq_free_tag_set(&rb_dev.tag_set);
+#endif
 		unregister_blkdev(rb_major, "rb");
 		ramdevice_cleanup();
 		return -ENOMEM;
 	}
 
 	/* TODO 2: Setting the major number */
-	rb_dev.rb_disk->major = 0;
+	rb_dev.disk->major = 0;
 	/* Setting the first mior number */
-	rb_dev.rb_disk->first_minor = RB_FIRST_MINOR;
+	rb_dev.disk->first_minor = RB_FIRST_MINOR;
 	/* Initializing the device operations */
-	rb_dev.rb_disk->fops = &rb_fops;
+	rb_dev.disk->fops = &rb_fops;
 	/* Driver-specific own internal data */
-	rb_dev.rb_disk->private_data = &rb_dev;
+	rb_dev.disk->private_data = &rb_dev;
 	/* TODO 3: Setting up the request queue */
-	rb_dev.rb_disk->queue = NULL;
+	rb_dev.disk->queue = NULL;
 	/*
 	 * You do not want partition information to show up in
 	 * cat /proc/partitions set this flags
 	 */
-	//rb_dev.rb_disk->flags = GENHD_FL_SUPPRESS_PARTITION_INFO;
-	sprintf(rb_dev.rb_disk->disk_name, "rb");
+	//rb_dev.disk->flags = GENHD_FL_SUPPRESS_PARTITION_INFO;
+	sprintf(rb_dev.disk->disk_name, "rb");
 	/* Setting the capacity of the device in its gendisk structure */
-	set_capacity(rb_dev.rb_disk, rb_dev.size);
+	set_capacity(rb_dev.disk, rb_dev.size);
 
 	/* Adding the disk to the system */
-	add_disk(rb_dev.rb_disk);
+	add_disk(rb_dev.disk);
 	/* Now the disk is "live" */
-	printk(KERN_INFO "rb: Ram Block driver initialised (%d sectors; %d bytes)\n",
-		rb_dev.size, rb_dev.size * RB_SECTOR_SIZE);
+	printk(KERN_INFO "rb: Ram Block driver initialised (%llu sectors; %llu bytes)\n",
+		(unsigned long long)(rb_dev.size), (unsigned long long)(rb_dev.size * RB_SECTOR_SIZE));
 
 	return 0;
 }
@@ -259,9 +295,12 @@ static int __init rb_init(void)
  */
 static void __exit rb_cleanup(void)
 {
-	del_gendisk(rb_dev.rb_disk);
-	put_disk(rb_dev.rb_disk);
-	blk_cleanup_queue(rb_dev.rb_queue);
+	del_gendisk(rb_dev.disk);
+	put_disk(rb_dev.disk);
+	blk_cleanup_queue(rb_dev.queue);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,0,0))
+	blk_mq_free_tag_set(&rb_dev.tag_set);
+#endif
 	unregister_blkdev(rb_major, "rb");
 	ramdevice_cleanup();
 }
