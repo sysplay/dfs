@@ -16,17 +16,20 @@ c. Share your observation about creating, listing, accessing files with file nam
 	> cd -
 d. Add the logic in real_sfs_ops.[hc], real_sfs.c to achieve "df".
 	Implement sfs_statfs and attach to .statfs (in struct super_operations).
-	Prototypes in <kernel_headers>/include/linux/fs.h
+	Function Prototype in <kernel_headers>/include/linux/fs.h
+	Structure Declaration in <kernel_headers>/include/linux/statfs.h
 	Reference Code: <kernel_source>/fs/fat/inode.c - search for .statfs
+	You may add code support code in real_sfs_ops.[hc]
 e. Compile the driver sfs_final.ko by typing "make".
 f. Post the snapshot of the following:
 	> sudo umount /mnt && sudo rmmod sfs_final && sudo insmod sfs_final.ko && sudo mount -t real_sfs /dev/rb1 /mnt
-	> df /mnt # No error & Proper details
+	> df --output /mnt # No error & Proper details
 	to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
 g. Add the logic in real_sfs_ops.[hc], real_sfs.c to achieve "mv".
 	Implement sfs_inode_rename and attach to .rename (in struct inode_operations).
-	Prototypes in <kernel_headers>/include/linux/fs.h
+	Function Prototype in <kernel_headers>/include/linux/fs.h
 	Reference Code: <kernel_source>/fs/fat/namei_msdos.c - search for .rename
+	You may add code support code in real_sfs_ops.[hc]
 h. Compile the driver sfs_final.ko by typing "make".
 i. Post the snapshot of the following:
 	> sudo umount /mnt && sudo rmmod sfs_final && sudo insmod sfs_final.ko && sudo mount -t real_sfs /dev/rb1 /mnt

@@ -2,8 +2,9 @@ Assignment #11
 
 a. Add the logic in real_sfs_ops.[hc], real_sfs.c to achieve "ln -s" in here.
 	Implement sfs_inode_symlink and attach to .symlink (in struct inode_operations).
-	Prototypes in <kernel_headers>/include/linux/fs.h
+	Function Prototype in <kernel_headers>/include/linux/fs.h
 	Reference Code: <kernel_source>/fs/minix/namei.c - search for .symlink
+	You may add code support code in real_sfs_ops.[hc]
 b. Compile the driver sfs_final.ko by typing "make".
 c. Load the driver sfs_final.ko using "sudo insmod sfs_final.ko".
 d. Post the snapshot of the following:

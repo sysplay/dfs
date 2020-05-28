@@ -18,7 +18,7 @@ static int read_sb_from_real_sfs(sfs_info_t *info, sfs_super_block_t *sb)
 	{
 		return -EIO;
 	}
-	memcpy(sb, bh->b_data, SIMULA_FS_BLOCK_SIZE);
+	memcpy(sb, bh->b_data, sizeof(sfs_super_block_t));
 	brelse(bh);
 	return 0;
 }

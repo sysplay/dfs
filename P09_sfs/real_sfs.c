@@ -4,6 +4,7 @@
 #include <linux/version.h> /* For LINUX_VERSION_CODE & KERNEL_VERSION */
 #include <linux/fs.h> /* For system calls, structures, ... */
 #include <linux/errno.h> /* For error codes */
+#include <linux/genhd.h> /* struct gendisk */
 #include <linux/slab.h> /* For kzalloc, ... */
 #include <linux/buffer_head.h> /* map_bh, block_write_begin, block_write_full_page, generic_write_end, ... */
 #include <linux/mpage.h> /* mpage_readpage, ... */
@@ -36,7 +37,7 @@ static int sfs_get_block(struct inode *inode, sector_t iblock, struct buffer_hea
 	printk(KERN_INFO "sfs: sfs_get_block called for I: %ld, B: %llu, C: %d\n",
 		inode->i_ino, (unsigned long long)(iblock), create);
 
-	if (iblock >= 0 /* TODO 12: Compare with the max data block count we support in SFS design */)
+	if (iblock >= 0 /* TODO 7: Compare with the max data block count we support in SFS design */)
 	{
 		return -ENOSPC;
 	}
@@ -52,7 +53,7 @@ static int sfs_get_block(struct inode *inode, sector_t iblock, struct buffer_hea
 		}
 		else
 		{
-			if ((fe.blocks[iblock] = 0 /* TODO 13: Get a free block for data block from SFS */) == INV_BLOCK)
+			if ((fe.blocks[iblock] = 0 /* TODO 8: Get a free block for data block from SFS */) == INV_BLOCK)
 			{
 				return -ENOSPC;
 			}
@@ -62,10 +63,8 @@ static int sfs_get_block(struct inode *inode, sector_t iblock, struct buffer_hea
 			}
 		}
 	}
-	phys = 0 /* TODO 14: Translate the SFS block number fe.blocks[iblock] to block driver block number */;
-	/*
-	 * For simplicity of TODO 14, you may assume that SFS block size is multiple of block driver block size
-	 */
+	/* For simplicity of TODO 9, you may assume that SFS block size is multiple of block driver block size */
+	phys = 0 /* TODO 9: Translate the SFS block number fe.blocks[iblock] to block driver block number */;
 	map_bh(bh_result, sb, phys);
 
 	return 0;
@@ -73,7 +72,7 @@ static int sfs_get_block(struct inode *inode, sector_t iblock, struct buffer_hea
 static int sfs_readpage(struct file *file, struct page *page)
 {
 	printk(KERN_INFO "sfs: sfs_readpage\n");
-	return mpage_readpage(page, NULL /* TODO 11A: Callback function to get the block number of the desired data block */);
+	return mpage_readpage(page, NULL /* TODO 10A: Callback function to get the block number of the desired data block */);
 }
 static int sfs_write_begin(struct file *file, struct address_space *mapping,
 	loff_t pos, unsigned len, unsigned flags, struct page **pagep, void **fsdata)
@@ -84,13 +83,13 @@ static int sfs_write_begin(struct file *file, struct address_space *mapping,
 	return block_write_begin(file, mapping, pos, len, flags, pagep, fsdata,
 		sfs_get_block);
 #else
-	return block_write_begin(mapping, pos, len, flags, pagep, NULL /* TODO 11B: Callback function to get the block number of the desired data block */);
+	return block_write_begin(mapping, pos, len, flags, pagep, NULL /* TODO 10B: Callback function to get the block number of the desired data block */);
 #endif
 }
 static int sfs_writepage(struct page *page, struct writeback_control *wbc)
 {
 	printk(KERN_INFO "sfs: sfs_writepage\n");
-	return block_write_full_page(page, NULL /* TODO 11C: Callback function to get the block number of the desired data block */, wbc);
+	return block_write_full_page(page, NULL /* TODO 10C: Callback function to get the block number of the desired data block */, wbc);
 }
 static struct address_space_operations sfs_aops =
 {
@@ -133,7 +132,7 @@ static int sfs_readdir(struct file *file, void *dirent, filldir_t filldir)
 			return retval;
 		file->f_pos++;
 	}
-	return sfs_list(NULL, NULL, NULL, NULL); /* TODO 10A: Fill in all the parameters */
+	return sfs_list(NULL, NULL, NULL, NULL); /* TODO 4A: Fill in all the parameters */
 }
 #else
 static int sfs_iterate(struct file *file, struct dir_context *ctx)
@@ -146,7 +145,7 @@ static int sfs_iterate(struct file *file, struct dir_context *ctx)
 	{
 		return -ENOSPC;
 	}
-	return sfs_list(NULL, NULL, NULL); /* TODO 10B: Fill in all the parameters */
+	return sfs_list(NULL, NULL, NULL); /* TODO 4B: Fill in all the parameters */
 }
 #endif
 static struct file_operations sfs_fops =
@@ -189,6 +188,53 @@ static struct file_operations sfs_dops =
 /*
  * Inode Operations
  */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(3,6,0))
+static struct dentry *sfs_inode_lookup(struct inode *parent_inode, struct dentry *dentry, struct nameidata *nameidata)
+#else
+static struct dentry *sfs_inode_lookup(struct inode *parent_inode, struct dentry *dentry, unsigned int flags)
+#endif
+{
+	sfs_info_t *info = (sfs_info_t *)(parent_inode->i_sb->s_fs_info);
+	char fn[SIMULA_FS_FILENAME_LEN + 1];
+	int ino;
+	sfs_file_entry_t fe;
+	struct inode *file_inode = NULL;
+
+	printk(KERN_INFO "sfs: sfs_inode_lookup\n");
+
+	if (parent_inode->i_ino != sfs_root_inode->i_ino)
+		return ERR_PTR(-ENOENT);
+	strncpy(fn, dentry->d_name.name, SIMULA_FS_FILENAME_LEN);
+	fn[SIMULA_FS_FILENAME_LEN] = 0;
+	if ((ino = sfs_lookup(NULL, "", NULL)) == INV_INODE) /* TODO 2: Fill in all the parameters */
+	  return d_splice_alias(file_inode, dentry); // Possibly create a new one
+
+	printk(KERN_INFO "sfs: Getting an existing inode\n");
+	file_inode = iget_locked(parent_inode->i_sb, ino);
+	if (!file_inode)
+		return ERR_PTR(-EACCES);
+	if (file_inode->i_state & I_NEW)
+	{
+		printk(KERN_INFO "sfs: Got new VFS inode for #%d, let's fill in\n", ino);
+		file_inode->i_size = fe.size;
+		file_inode->i_mode = S_IFREG;
+		file_inode->i_mode |= ((fe.perms & 4) ? S_IRUSR | S_IRGRP | S_IROTH : 0);
+		file_inode->i_mode |= ((fe.perms & 2) ? S_IWUSR | S_IWGRP | S_IWOTH : 0);
+		file_inode->i_mode |= ((fe.perms & 1) ? S_IXUSR | S_IXGRP | S_IXOTH : 0);
+		file_inode->i_atime.tv_sec = file_inode->i_mtime.tv_sec = file_inode->i_ctime.tv_sec = 0 /* TODO 3: SFS file timestamp */;
+		file_inode->i_atime.tv_nsec = file_inode->i_mtime.tv_nsec = file_inode->i_ctime.tv_nsec = 0;
+		file_inode->i_mapping->a_ops = &sfs_aops;
+		file_inode->i_fop = &sfs_fops;
+		unlock_new_inode(file_inode);
+	}
+	else
+	{
+		printk(KERN_INFO "sfs: Got VFS inode from inode cache\n");
+	}
+	d_add(dentry, file_inode);
+	return NULL;
+	// Above 2 lines can be replaced by 'return d_splice_alias(file_inode, dentry);'
+}
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(3,3,0))
 static int sfs_inode_create(struct inode *parent_inode, struct dentry *dentry, int mode, struct nameidata *nameidata)
 #elif (LINUX_VERSION_CODE < KERNEL_VERSION(3,6,0))
@@ -217,7 +263,7 @@ static int sfs_inode_create(struct inode *parent_inode, struct dentry *dentry, u
 	perms |= (mode & S_IRUSR) ? 4 : 0;
 	perms |= (mode & S_IWUSR) ? 2 : 0;
 	perms |= (mode & S_IXUSR) ? 1 : 0;
-	if ((ino = sfs_create(NULL, "", 0, NULL)) == INV_INODE) /* TODO 6: Fill in all the parameters */
+	if ((ino = sfs_create(NULL, "", 0, NULL)) == INV_INODE) /* TODO 5: Fill in all the parameters */
 		return -ENOSPC;
 
 	file_inode = new_inode(parent_inode->i_sb);
@@ -257,65 +303,18 @@ static int sfs_inode_unlink(struct inode *parent_inode, struct dentry *dentry)
 
 	strncpy(fn, dentry->d_name.name, SIMULA_FS_FILENAME_LEN);
 	fn[SIMULA_FS_FILENAME_LEN] = 0;
-	if ((ino = sfs_remove(NULL, "")) == INV_INODE) /* TODO 7: Fill in all the parameters */
+	if ((ino = sfs_remove(NULL, "")) == INV_INODE) /* TODO 6: Fill in all the parameters */
 		return -EINVAL;
 
 	inode_dec_link_count(file_inode);
 	return 0;
 }
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(3,6,0))
-static struct dentry *sfs_inode_lookup(struct inode *parent_inode, struct dentry *dentry, struct nameidata *nameidata)
-#else
-static struct dentry *sfs_inode_lookup(struct inode *parent_inode, struct dentry *dentry, unsigned int flags)
-#endif
-{
-	sfs_info_t *info = (sfs_info_t *)(parent_inode->i_sb->s_fs_info);
-	char fn[SIMULA_FS_FILENAME_LEN + 1];
-	int ino;
-	sfs_file_entry_t fe;
-	struct inode *file_inode = NULL;
-
-	printk(KERN_INFO "sfs: sfs_inode_lookup\n");
-
-	if (parent_inode->i_ino != sfs_root_inode->i_ino)
-		return ERR_PTR(-ENOENT);
-	strncpy(fn, dentry->d_name.name, SIMULA_FS_FILENAME_LEN);
-	fn[SIMULA_FS_FILENAME_LEN] = 0;
-	if ((ino = sfs_lookup(NULL, "", NULL)) == INV_INODE) /* TODO 8: Fill in all the parameters */
-	  return d_splice_alias(file_inode, dentry); // Possibly create a new one
-
-	printk(KERN_INFO "sfs: Getting an existing inode\n");
-	file_inode = iget_locked(parent_inode->i_sb, ino);
-	if (!file_inode)
-		return ERR_PTR(-EACCES);
-	if (file_inode->i_state & I_NEW)
-	{
-		printk(KERN_INFO "sfs: Got new VFS inode for #%d, let's fill in\n", ino);
-		file_inode->i_size = fe.size;
-		file_inode->i_mode = S_IFREG;
-		file_inode->i_mode |= ((fe.perms & 4) ? S_IRUSR | S_IRGRP | S_IROTH : 0);
-		file_inode->i_mode |= ((fe.perms & 2) ? S_IWUSR | S_IWGRP | S_IWOTH : 0);
-		file_inode->i_mode |= ((fe.perms & 1) ? S_IXUSR | S_IXGRP | S_IXOTH : 0);
-		file_inode->i_atime.tv_sec = file_inode->i_mtime.tv_sec = file_inode->i_ctime.tv_sec = 0 /* TODO 9: SFS file timestamp */;
-		file_inode->i_atime.tv_nsec = file_inode->i_mtime.tv_nsec = file_inode->i_ctime.tv_nsec = 0;
-		file_inode->i_mapping->a_ops = &sfs_aops;
-		file_inode->i_fop = &sfs_fops;
-		unlock_new_inode(file_inode);
-	}
-	else
-	{
-		printk(KERN_INFO "sfs: Got VFS inode from inode cache\n");
-	}
-	d_add(dentry, file_inode);
-	return NULL;
-	// Above 2 lines can be replaced by 'return d_splice_alias(file_inode, dentry);'
-}
 static struct inode_operations sfs_iops =
 {
 	/*
+	lookup: sfs_inode_lookup,
 	create: sfs_inode_create,
-	unlink: sfs_inode_unlink,
-	lookup: sfs_inode_lookup
+	unlink: sfs_inode_unlink
 	*/
 };
 
@@ -324,7 +323,7 @@ static struct inode_operations sfs_iops =
  */
 static void sfs_put_super(struct super_block *sb)
 {
-	sfs_info_t *info = (sfs_info_t *)(NULL /* TODO 5: Get the private data from the VFS super block */);
+	sfs_info_t *info = (sfs_info_t *)(NULL /* TODO 1: Get the private data from the VFS super block */);
 
 	printk(KERN_INFO "sfs: sfs_put_super\n");
 	if (info)
@@ -351,20 +350,18 @@ static int sfs_write_inode(struct inode *inode, struct writeback_control *wbc)
 	size = i_size_read(inode);
 	timestamp = inode->i_mtime.tv_sec > inode->i_ctime.tv_sec ? inode->i_mtime.tv_sec : inode->i_ctime.tv_sec;
 	perms = 0;
-	perms |= (inode->i_mode & (S_IRUSR | S_IRGRP | S_IROTH)) ? 0 /* TODO 1: SFS permission for read */ : 0;
-	perms |= (inode->i_mode & (S_IWUSR | S_IWGRP | S_IWOTH)) ? 0 /* TODO 2: SFS permission for write */ : 0;
-	perms |= (inode->i_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) ? 0 /* TODO 3: SFS permission for execute */ : 0;
+	perms |= (inode->i_mode & (S_IRUSR | S_IRGRP | S_IROTH)) ? 0 /* TODO 11: SFS permission for read */ : 0;
+	perms |= (inode->i_mode & (S_IWUSR | S_IWGRP | S_IWOTH)) ? 0 /* TODO 12: SFS permission for write */ : 0;
+	perms |= (inode->i_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) ? 0 /* TODO 13: SFS permission for execute */ : 0;
 
 	printk(KERN_INFO "sfs: sfs_write_inode with %d bytes @ %d secs w/ %o\n",
 		size, timestamp, perms);
 
-	return sfs_update(NULL, 0, NULL, NULL, NULL); /* TODO 4: Fill in all the parameters */
+	return sfs_update(NULL, 0, NULL, NULL, NULL); /* TODO 14: Fill in all the parameters */
 }
-
 static struct super_operations sfs_sops =
 {
 	put_super: sfs_put_super,
-	//statfs: sfs_statfs, // implement for df to show it up
 	/*
 	write_inode: sfs_write_inode
 	*/
@@ -388,6 +385,8 @@ static int sfs_fill_super(struct super_block *sb, void *data, int silent)
 	sfs_info_t *info;
 
 	printk(KERN_INFO "sfs: sfs_fill_super\n");
+	printk(KERN_INFO "sfs: /dev/%s block size = %d\n",
+		sb->s_bdev->bd_disk->disk_name, sb->s_bdev->bd_block_size);
 	if (!(info = (sfs_info_t *)(kzalloc(sizeof(sfs_info_t), GFP_KERNEL))))
 		return -ENOMEM;
 	info->vfs_sb = sb;
@@ -439,7 +438,6 @@ static int sfs_fill_super(struct super_block *sb, void *data, int silent)
 
 	return 0;
 }
-
 /*
  * File-System Operations
  */
@@ -460,7 +458,6 @@ static struct dentry *sfs_mount(struct file_system_type *fs_type, int flags, con
 	return mount_bdev(fs_type, flags, devname, data, &sfs_fill_super);
 }
 #endif
-
 static struct file_system_type sfs =
 {
 	name: "real_sfs", /* Name of our file system */
