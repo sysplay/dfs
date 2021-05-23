@@ -2,6 +2,7 @@
 #include <linux/fs.h> /* For struct super_block */
 #include <linux/errno.h> /* For error codes */
 #include <linux/buffer_head.h> /* struct buffer_head, sb_bread, ... */
+#include <linux/blkdev.h> /* block_size, ... */
 #include <linux/string.h> /* For memcpy */
 #include <linux/vmalloc.h> /* For vmalloc, ... */
 #include <linux/time.h> /* For get_seconds, ... */
@@ -24,8 +25,8 @@ static int read_sb_from_real_sfs(sfs_info_t *info, sfs_super_block_t *sb)
 }
 static int read_from_real_sfs(sfs_info_t *info, byte4_t block, byte4_t offset, void *buf, byte4_t len)
 {
-	byte4_t block_size = info->sb.block_size;
-	byte4_t bd_block_size = info->vfs_sb->s_bdev->bd_block_size;
+	byte4_t fs_block_size = info->sb.block_size;
+	byte4_t bd_block_size = block_size(info->vfs_sb->s_bdev);
 	byte4_t abs;
 	struct buffer_head *bh;
 
@@ -47,8 +48,8 @@ static int read_from_real_sfs(sfs_info_t *info, byte4_t block, byte4_t offset, v
 }
 static int write_to_real_sfs(sfs_info_t *info, byte4_t block, byte4_t offset, void *buf, byte4_t len)
 {
-	byte4_t block_size = info->sb.block_size;
-	byte4_t bd_block_size = info->vfs_sb->s_bdev->bd_block_size;
+	byte4_t fs_block_size = info->sb.block_size;
+	byte4_t bd_block_size = block_size(info->vfs_sb->s_bdev);
 	byte4_t abs;
 	struct buffer_head *bh;
 

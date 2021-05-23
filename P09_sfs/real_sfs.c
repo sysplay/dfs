@@ -7,6 +7,7 @@
 #include <linux/genhd.h> /* struct gendisk */
 #include <linux/slab.h> /* For kzalloc, ... */
 #include <linux/buffer_head.h> /* map_bh, block_write_begin, block_write_full_page, generic_write_end, ... */
+#include <linux/blkdev.h> /* block_size, ... */
 #include <linux/mpage.h> /* mpage_readpage, ... */
 
 #include "real_sfs_ds.h" /* For SFS related defines, data structures, ... */
@@ -386,7 +387,7 @@ static int sfs_fill_super(struct super_block *sb, void *data, int silent)
 
 	printk(KERN_INFO "sfs: sfs_fill_super\n");
 	printk(KERN_INFO "sfs: /dev/%s block size = %d\n",
-		sb->s_bdev->bd_disk->disk_name, sb->s_bdev->bd_block_size);
+		sb->s_bdev->bd_disk->disk_name, block_size(sb->s_bdev));
 	if (!(info = (sfs_info_t *)(kzalloc(sizeof(sfs_info_t), GFP_KERNEL))))
 		return -ENOMEM;
 	info->vfs_sb = sb;
