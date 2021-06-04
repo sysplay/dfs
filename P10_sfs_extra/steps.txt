@@ -39,6 +39,8 @@ i. Post the snapshot of the following:
 	> mv xyz abc
 	> ls -la
 	> cd -
+	> sudo umount /mnt && sudo mount -t real_sfs /dev/rb1 /mnt
+	> ls -la /mnt
 	> sudo umount /mnt
 	to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
 j. Unload the driver sfs_final.ko using "sudo rmmod sfs_final".

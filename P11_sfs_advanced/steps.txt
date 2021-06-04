@@ -17,6 +17,8 @@ d. Post the snapshot of the following:
 	> dd if=/dev/zero of=max bs=512 count=10 # Observe the error. Why?
 	> ls -la
 	> cd -
+	> sudo umount /mnt && sudo mount -t real_sfs /dev/rb1 /mnt
+	> ls -la /mnt
 	to SysPlay's WhatsApp number, NOT the WhatsApp group, for gradation.
 e. Add the logic in real_sfs_ds.h, real_sfs_ops.[hc], real_sfs.c to support files bigger than 4.5 KiB.
 	Increase the block size to 1 KiB
