@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 	sb.entry_count = 0;
 	sb.data_block_start = SFS_ENTRY_TABLE_BLOCK_START + sb.entry_table_size;
 
-	printf("Partitioning %Ld byte sized %s ... ", size, argv[1]);
+	printf("Making SIMULA FS on %Ld byte sized partition %s ... ", size, argv[1]);
 	fflush(stdout);
 	write_super_block(sfs_handle, &sb);
 	clear_file_entries(sfs_handle, &sb);
