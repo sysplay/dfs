@@ -5,7 +5,7 @@
 #include <linux/blkdev.h> /* block_size, ... */
 #include <linux/string.h> /* For memcpy */
 #include <linux/vmalloc.h> /* For vmalloc, ... */
-#include <linux/time.h> /* For get_seconds, ... */
+#include <linux/ktime.h> /* For ktime_get_seconds, ... */
 
 #include "real_sfs_ds.h"
 #include "real_sfs_ops.h"
